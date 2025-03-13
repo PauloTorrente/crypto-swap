@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-// Estilos con Styled Components
+// Estilos com Styled Components
 const Container = styled(motion.div)`
   display: flex;
   flex-direction: column;
@@ -89,22 +89,24 @@ function App() {
   const [loading, setLoading] = useState(true);
   const commission = 0.0195; // 1.95%
 
-  // Obtener el precio de USDT en la moneda seleccionada
+  // Obtener la tasa de cambio de la moneda seleccionada
   useEffect(() => {
-    const fetchUSDTPrice = async () => {
+    const fetchExchangeRate = async () => {
       try {
+        // Usar una API de terceros para obtener la tasa de cambio fiat
         const response = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=USDT${selectedCurrency}`
+          `https://api.exchangerate-api.com/v4/latest/USD`
         );
-        setExchangeRate(parseFloat(response.data.price));
+        const rates = response.data.rates;
+        setExchangeRate(rates[selectedCurrency]);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching USDT price:", error);
+        console.error("Error fetching exchange rate:", error);
         setLoading(false);
       }
     };
 
-    fetchUSDTPrice();
+    fetchExchangeRate();
   }, [selectedCurrency]);
 
   // Manejar el cambio de moneda
