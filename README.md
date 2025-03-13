@@ -21,7 +21,4 @@ CryptoSwap is a real-time currency converter that allows users to convert their 
 - **APIs**: Binance API (for USDT rates), Exchange Rates API (for fiat rates)
 - **Deployment**: Vercel
 
-## Setup Instructions 📂
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/crypto-swap.git
+
