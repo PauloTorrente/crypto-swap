@@ -68,6 +68,20 @@ const ErrorMessage = styled.p`
   margin-top: 10px;
 `;
 
+const P2POffers = styled.div`
+  margin-top: 20px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+`;
+
+const Offer = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+`;
+
 // Animaciones con Framer Motion
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -95,6 +109,7 @@ function App() {
   const [convertedAmount, setConvertedAmount] = useState(null); // Valor convertido
   const [exchangeRateFrom, setExchangeRateFrom] = useState(null); // Taxa de câmbio da moeda nacional para USDT
   const [exchangeRateTo, setExchangeRateTo] = useState(null); // Taxa de câmbio da moeda estrangeira para USDT
+  const [p2pOffers, setP2POffers] = useState([]); // Ofertas P2P
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -107,13 +122,13 @@ function App() {
 
         // Obtener la tasa de cambio de la moneda nacional a USDT
         const responseFrom = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${fromCurrency}USDT`
+          `http://localhost:3001/api/binance?symbol=${fromCurrency}USDT`
         );
         const rateFrom = parseFloat(responseFrom.data.price);
 
         // Obtener la tasa de cambio de la moneda extranjera a USDT
         const responseTo = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${toCurrency}USDT`
+          `http://localhost:3001/api/binance?symbol=${toCurrency}USDT`
         );
         const rateTo = parseFloat(responseTo.data.price);
 
@@ -138,6 +153,26 @@ function App() {
     const interval = setInterval(fetchExchangeRates, 60000);
     return () => clearInterval(interval);
   }, [fromCurrency, toCurrency, amount]);
+
+  // Obtener las ofertas P2P
+  useEffect(() => {
+    const fetchP2POffers = async () => {
+      try {
+        const response = await axios.post("http://localhost:3001/api/binance-p2p", {
+          page: 1,
+          rows: 5,
+          asset: "USDT",
+          tradeType: "BUY",
+          fiat: fromCurrency,
+        });
+        setP2POffers(response.data.data);
+      } catch (error) {
+        console.error("Error fetching P2P offers:", error);
+      }
+    };
+
+    fetchP2POffers();
+  }, [fromCurrency]);
 
   // Manejar el cambio de moneda nacional
   const handleFromCurrencyChange = (e) => {
@@ -210,6 +245,18 @@ function App() {
           </p>
         </Result>
       )}
+
+      {/* Ofertas P2P */}
+      <P2POffers>
+        <h3>Ofertas P2P (USDT/{fromCurrency})</h3>
+        {p2pOffers.map((offer, index) => (
+          <Offer key={index}>
+            <p><strong>Precio:</strong> {offer.adv.price} {fromCurrency}</p>
+            <p><strong>Límite:</strong> {offer.adv.minSingleTransAmount} - {offer.adv.maxSingleTransAmount} {fromCurrency}</p>
+            <p><strong>Métodos de pago:</strong> {offer.adv.payTypes.join(", ")}</p>
+          </Offer>
+        ))}
+      </P2POffers>
     </Container>
   );
 }
