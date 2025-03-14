@@ -62,6 +62,12 @@ const Result = styled(motion.div)`
   margin-top: 20px;
 `;
 
+const ErrorMessage = styled.p`
+  color: #ff6b6b;
+  font-size: 1rem;
+  margin-top: 10px;
+`;
+
 // Animaciones con Framer Motion
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -83,36 +89,64 @@ function App() {
     { code: "EUR", name: "Euros", flag: "https://flagcdn.com/eu.svg" },
     { code: "USD", name: "Dólares Estadounidenses", flag: "https://flagcdn.com/us.svg" },
   ]);
-  const [selectedCurrency, setSelectedCurrency] = useState("BRL");
-  const [amount, setAmount] = useState(1000);
-  const [exchangeRate, setExchangeRate] = useState(null);
+  const [fromCurrency, setFromCurrency] = useState("BOB"); // Moeda nacional (padrão: BOB)
+  const [toCurrency, setToCurrency] = useState("BRL"); // Moeda estrangeira (padrão: BRL)
+  const [amount, setAmount] = useState(1000); // Valor em moeda nacional
+  const [convertedAmount, setConvertedAmount] = useState(null); // Valor convertido
+  const [exchangeRateFrom, setExchangeRateFrom] = useState(null); // Taxa de câmbio da moeda nacional para USDT
+  const [exchangeRateTo, setExchangeRateTo] = useState(null); // Taxa de câmbio da moeda estrangeira para USDT
   const [loading, setLoading] = useState(true);
-  const commission = 0.0195; // 1.95%
+  const [error, setError] = useState(null);
 
-  // Obtener la tasa de cambio de la moneda seleccionada
+  // Obtener las tasas de cambio de las monedas seleccionadas a USDT
   useEffect(() => {
-    const fetchExchangeRate = async () => {
+    const fetchExchangeRates = async () => {
       try {
-        // Usar una API de terceros para obtener la tasa de cambio fiat
-        const response = await axios.get(
-          `https://api.exchangerate-api.com/v4/latest/USD`
+        setError(null);
+        setLoading(true);
+
+        // Obtener la tasa de cambio de la moneda nacional a USDT
+        const responseFrom = await axios.get(
+          `https://api.binance.com/api/v3/ticker/price?symbol=${fromCurrency}USDT`
         );
-        const rates = response.data.rates;
-        setExchangeRate(rates[selectedCurrency]);
-        setLoading(false);
+        const rateFrom = parseFloat(responseFrom.data.price);
+
+        // Obtener la tasa de cambio de la moneda extranjera a USDT
+        const responseTo = await axios.get(
+          `https://api.binance.com/api/v3/ticker/price?symbol=${toCurrency}USDT`
+        );
+        const rateTo = parseFloat(responseTo.data.price);
+
+        setExchangeRateFrom(rateFrom);
+        setExchangeRateTo(rateTo);
+
+        // Calcular el valor convertido
+        const amountInUSDT = amount / rateFrom;
+        const finalAmount = amountInUSDT * rateTo;
+        setConvertedAmount(finalAmount.toFixed(2));
       } catch (error) {
-        console.error("Error fetching exchange rate:", error);
+        console.error("Error fetching exchange rates:", error);
+        setError("Error al obtener el tipo de cambio. Inténtelo de nuevo más tarde.");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchExchangeRate();
-  }, [selectedCurrency]);
+    fetchExchangeRates();
 
-  // Manejar el cambio de moneda
-  const handleCurrencyChange = (e) => {
-    setSelectedCurrency(e.target.value);
-    setLoading(true);
+    // Actualizar cada 60 segundos
+    const interval = setInterval(fetchExchangeRates, 60000);
+    return () => clearInterval(interval);
+  }, [fromCurrency, toCurrency, amount]);
+
+  // Manejar el cambio de moneda nacional
+  const handleFromCurrencyChange = (e) => {
+    setFromCurrency(e.target.value);
+  };
+
+  // Manejar el cambio de moneda extranjera
+  const handleToCurrencyChange = (e) => {
+    setToCurrency(e.target.value);
   };
 
   // Manejar el cambio de cantidad
@@ -121,29 +155,26 @@ function App() {
   };
 
   // Obtener la bandera de la moneda seleccionada
-  const selectedFlag = currencies.find((curr) => curr.code === selectedCurrency)?.flag;
-
-  // Calcular el valor en USDT con comisión
-  const calculateFinalAmount = () => {
-    if (!exchangeRate) return null;
-    const amountInUSDT = amount / exchangeRate;
-    const finalAmount = amountInUSDT * (1 - commission);
-    return finalAmount.toFixed(2);
-  };
+  const fromFlag = currencies.find((curr) => curr.code === fromCurrency)?.flag;
+  const toFlag = currencies.find((curr) => curr.code === toCurrency)?.flag;
 
   return (
     <Container variants={containerVariants} initial="hidden" animate="visible">
-      <Title>CryptoSwap</Title>
+      <Title>Tasa de Cambio</Title>
+
+      {/* Selección de moneda nacional */}
       <SelectContainer>
-        <Select value={selectedCurrency} onChange={handleCurrencyChange}>
+        <Select value={fromCurrency} onChange={handleFromCurrencyChange}>
           {currencies.map((curr) => (
             <option key={curr.code} value={curr.code}>
               {curr.name} ({curr.code})
             </option>
           ))}
         </Select>
-        {selectedFlag && <Flag src={selectedFlag} alt={`${selectedCurrency} flag`} />}
+        {fromFlag && <Flag src={fromFlag} alt={`${fromCurrency} flag`} />}
       </SelectContainer>
+
+      {/* Campo para inserir o valor em moeda nacional */}
       <Input
         type="number"
         value={amount}
@@ -152,21 +183,30 @@ function App() {
         placeholder="Cantidad"
       />
 
+      {/* Selección de moeda estrangeira */}
+      <SelectContainer>
+        <Select value={toCurrency} onChange={handleToCurrencyChange}>
+          {currencies.map((curr) => (
+            <option key={curr.code} value={curr.code}>
+              {curr.name} ({curr.code})
+            </option>
+          ))}
+        </Select>
+        {toFlag && <Flag src={toFlag} alt={`${toCurrency} flag`} />}
+      </SelectContainer>
+
+      {/* Resultado da conversão */}
       {loading ? (
         <p>Loading...</p>
+      ) : error ? (
+        <ErrorMessage>{error}</ErrorMessage>
       ) : (
         <Result variants={resultVariants} initial="hidden" animate="visible">
           <p>
-            Monto ingresado: {amount} {selectedCurrency}
+            {amount} {fromCurrency} = {convertedAmount} {toCurrency}
           </p>
           <p>
-            Tipo de cambio: 1 USDT = {exchangeRate} {selectedCurrency}
-          </p>
-          <p>
-            Comisión (1.95%): {(amount * commission).toFixed(2)} {selectedCurrency}
-          </p>
-          <p>
-            Monto final en USDT: {calculateFinalAmount()}
+            Tipo de cambio: 1 {fromCurrency} = {(exchangeRateTo / exchangeRateFrom).toFixed(2)} {toCurrency}
           </p>
         </Result>
       )}
