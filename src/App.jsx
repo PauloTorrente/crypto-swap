@@ -107,21 +107,13 @@ const App = () => {
   // Iniciando o Chart.js
   ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
 
-  useEffect(() => {
-    fetchCurrencyRate(fromCurrency);
-    fetchCurrencyRate(toCurrency);
-    fetchHistoricalData(selectedPeriod); // Carrega os dados históricos com base no período selecionado
-  }, [fromCurrency, toCurrency, selectedPeriod]); // Adiciona selectedPeriod como dependência
-
+  // Função para buscar as taxas de câmbio
   const fetchCurrencyRate = async (currency) => {
     try {
-      // Verifica se a moeda tem um mapeamento para outra
       const mappedCurrency = currencyMapping[currency] || currency;
-      
-      // Consultar a taxa de câmbio para a moeda em relação ao USDT
       const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=${mappedCurrency.toLowerCase()}`);
       const rate = response.data.usd[mappedCurrency.toLowerCase()];
-      
+
       if (currency === fromCurrency) {
         setFromCurrencyRate(rate);
       } else {
@@ -132,11 +124,27 @@ const App = () => {
     }
   };
 
+  // Função para atualizar taxas em intervalos regulares
+  const updateCurrencyRates = () => {
+    fetchCurrencyRate(fromCurrency);
+    fetchCurrencyRate(toCurrency);
+  };
+
+  useEffect(() => {
+    updateCurrencyRates();
+    const intervalId = setInterval(updateCurrencyRates, 300000); // Atualiza a cada 5 minutos
+
+    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
+  }, [fromCurrency, toCurrency]);
+
+  useEffect(() => {
+    fetchHistoricalData(selectedPeriod);
+  }, [selectedPeriod]);
+
   const fetchHistoricalData = async (period) => {
     let data;
     switch (period) {
       case '6m':
-        // Dados históricos para os últimos 6 meses
         data = [
           { time: '2025-03-01', price: 1.00 },
           { time: '2025-03-15', price: 1.02 },
@@ -147,7 +155,6 @@ const App = () => {
         ];
         break;
       case '1y':
-        // Dados históricos para 1 ano
         data = [
           { time: '2025-03-01', price: 1.00 },
           { time: '2025-06-01', price: 1.05 },
@@ -157,7 +164,6 @@ const App = () => {
         ];
         break;
       case '5y':
-        // Dados históricos para 5 anos
         data = [
           { time: '2020-03-01', price: 1.00 },
           { time: '2021-03-01', price: 1.10 },
@@ -183,9 +189,7 @@ const App = () => {
 
   const convertCurrency = () => {
     if (fromCurrencyRate && toCurrencyRate) {
-      // Primeiro converte a moeda de origem para USDT
       const valueInUSDT = amount / fromCurrencyRate;
-      // Depois converte de USDT para a moeda de destino
       const convertedValue = valueInUSDT * toCurrencyRate;
       return convertedValue.toFixed(2);
     }
@@ -211,103 +215,74 @@ const App = () => {
       >
         <TitleText>Conversor de Moedas via USDT</TitleText>
 
-        {/* Seleção da moeda de origem */}
-        <SelectBox onChange={(e) => setFromCurrency(e.target.value)} value={fromCurrency}>
-          {currencies.map((currency) => (
-            <OptionContainer key={currency.name} value={currency.name}>
-              <Flag src={currency.flag} alt={`${currency.name} flag`} />
-              {currency.name}
-            </OptionContainer>
-          ))}
-        </SelectBox>
+        {/* Seleção de Moeda */}
+        <div>
+          <SelectBox value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+            {currencies.map((currency) => (
+              <OptionContainer key={currency.name} value={currency.name}>
+                <Flag src={currency.flag} alt={currency.name} />
+                {currency.name}
+              </OptionContainer>
+            ))}
+          </SelectBox>
 
-        {/* Seleção da moeda de destino */}
-        <SelectBox onChange={(e) => setToCurrency(e.target.value)} value={toCurrency}>
-          {currencies.map((currency) => (
-            <OptionContainer key={currency.name} value={currency.name}>
-              <Flag src={currency.flag} alt={`${currency.name} flag`} />
-              {currency.name}
-            </OptionContainer>
-          ))}
-        </SelectBox>
+          <SelectBox value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+            {currencies.map((currency) => (
+              <OptionContainer key={currency.name} value={currency.name}>
+                <Flag src={currency.flag} alt={currency.name} />
+                {currency.name}
+              </OptionContainer>
+            ))}
+          </SelectBox>
 
-        {/* Input para valor a ser convertido */}
-        <AmountInput
-          type="number"
-          value={amount}
-          onChange={handleAmountChange}
-          placeholder="Digite o valor"
-        />
+          <AmountInput
+            type="number"
+            value={amount}
+            onChange={handleAmountChange}
+            placeholder="Quantidade"
+          />
 
-        {/* Seleção do período */}
-        <SelectBox onChange={handlePeriodChange} value={selectedPeriod}>
-          <OptionContainer value="6m">Últimos 6 meses</OptionContainer>
-          <OptionContainer value="1y">Último 1 ano</OptionContainer>
-          <OptionContainer value="5y">Últimos 5 anos</OptionContainer>
-        </SelectBox>
+          {/* Exibição do valor convertido */}
+          <ExchangeRate>
+            {convertCurrency()} {toCurrency}
+          </ExchangeRate>
 
-        {/* Exibindo o valor convertido */}
-        <Button onClick={convertCurrency}>Converter</Button>
-
-        {/* Resultado da conversão */}
-        <ExchangeRate>
-          {amount} {fromCurrency} = {convertCurrency()} {toCurrency}
-        </ExchangeRate>
-
-        {/* Explicação do cálculo */}
-        <ExplanationContainer>
-          <p><strong>Como o valor foi calculado:</strong></p>
-          <p>{explanationText()}</p>
-        </ExplanationContainer>
-        {/* Gráfico histórico */}
-        <ChartContainer>
-          <Line
-            data={{
-              labels: historicalData.map(item => item.time),
-              datasets: [
-                {
-                  label: `Preço histórico 1 USDT em ${fromCurrency}`,
-                  data: historicalData.map(item => item.price),
-                  borderColor: '#4CAF50',
-                  fill: false,
-                  tension: 0.4,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: 'top',
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function (tooltipItem) {
-                      // Customiza a exibição da tooltip
-                      return `${tooltipItem.dataset.label}: ${tooltipItem.raw} ${fromCurrency}`;
-                    },
+          {/* Gráfico */}
+          <ChartContainer>
+            <Line
+              data={{
+                labels: historicalData.map(data => data.time),
+                datasets: [
+                  {
+                    label: `Taxa de ${fromCurrency} para ${toCurrency}`,
+                    data: historicalData.map(data => data.price),
+                    fill: false,
+                    borderColor: '#4CAF50',
+                    tension: 0.1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: 'Histórico de Taxa de Câmbio',
                   },
                 },
-              },
-            }}
-          />
-        </ChartContainer>
+              }}
+            />
+          </ChartContainer>
 
-        {/* Exibindo detalhes do cálculo */}
-        <div style={{ marginTop: '20px', fontSize: '1.2em', color: '#333' }}>
-          <h2>Detalhes do Cálculo:</h2>
-          <p><strong>Valor Original:</strong> {amount} {fromCurrency}</p>
-          <p><strong>Taxa de {fromCurrency} para USDT:</strong> {fromCurrencyRate ? fromCurrencyRate.toFixed(4) : 'Carregando...'}</p>
-          <p><strong>Taxa de USDT para {toCurrency}:</strong> {toCurrencyRate ? toCurrencyRate.toFixed(4) : 'Carregando...'}</p>
-          <p>
-            <strong>Cálculo:</strong> ({amount} ÷ {fromCurrencyRate ? fromCurrencyRate.toFixed(4) : 'Carregando...'}) * {toCurrencyRate ? toCurrencyRate.toFixed(4) : 'Carregando...'} = {convertCurrency()} {toCurrency}
-          </p>
-          <p><i>Fonte de Taxas: CoinGecko</i></p>
-        </div>
+          <Button onClick={() => alert('Conversão realizada!')}>Converter</Button>
+
+          <ExplanationContainer>
+            {explanationText()}
+          </ExplanationContainer>
+        </motion.div>
       </motion.div>
     </Container>
   );
 };
 
 export default App;
-
