@@ -68,6 +68,29 @@ const Calculation = styled.div`
   color: #ddd;
 `;
 
+const ErrorMessage = styled.div`
+  color: #ff6b6b;
+  margin-top: 10px;
+`;
+
+const LoadingSpinner = styled.div`
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 // Animação com Framer Motion
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -97,7 +120,8 @@ function App() {
   const [convertedAmount, setConvertedAmount] = useState(null);
   const [usdtToFrom, setUsdtToFrom] = useState(null);
   const [usdtToTo, setUsdtToTo] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Função para obter o valor de USDT em uma moeda específica
   const getUSDTValue = async (currency) => {
@@ -108,13 +132,20 @@ function App() {
       return parseFloat(response.data.price);
     } catch (error) {
       console.error(`Erro ao buscar valor de USDT em ${currency}:`, error);
+      setError(`Erro ao buscar valor de USDT em ${currency}. Tente novamente.`);
       return null;
     }
   };
 
   // Função para calcular a conversão
   const convertCurrency = async () => {
+    if (amount <= 0) {
+      setError("O valor deve ser maior que zero.");
+      return;
+    }
+
     setLoading(true);
+    setError(null);
 
     const usdtFrom = await getUSDTValue(fromCurrency); // Valor de USDT na moeda de origem
     const usdtTo = await getUSDTValue(toCurrency); // Valor de USDT na moeda de destino
@@ -177,7 +208,9 @@ function App() {
 
       {/* Exibição do resultado */}
       {loading ? (
-        <p>Carregando...</p>
+        <LoadingSpinner />
+      ) : error ? (
+        <ErrorMessage>{error}</ErrorMessage>
       ) : (
         <>
           <Result variants={resultVariants} initial="hidden" animate="visible">
