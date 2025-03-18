@@ -1,288 +1,213 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-import styled from 'styled-components';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import axios from "axios";
 
 // Estilos com Styled Components
-const Container = styled.div`
+const Container = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
   padding: 20px;
+  font-family: "Arial", sans-serif;
 `;
 
-const TitleText = styled.h1`
-  font-size: 2em;
-  color: #333;
+const Title = styled.h1`
+  font-size: 2.5rem;
   margin-bottom: 20px;
 `;
 
-const SelectBox = styled.select`
-  padding: 10px;
-  font-size: 1em;
-  margin-bottom: 20px;
-`;
-
-const OptionContainer = styled.option`
+const SelectContainer = styled.div`
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const Select = styled.select`
   padding: 10px;
-`;
-
-const Button = styled.button`
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1.1em;
-  border: none;
-  cursor: pointer;
+  font-size: 1rem;
   border-radius: 5px;
-  margin-bottom: 30px;
-
-  &:hover {
-    background-color: #45a049;
-  }
+  border: none;
+  background-color: #fff;
+  color: #333;
 `;
 
-const ExchangeRate = styled.div`
-  font-size: 1.5em;
+const Input = styled.input`
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #fff;
   color: #333;
+  width: 150px;
 `;
 
 const Flag = styled.img`
   width: 30px;
   height: 20px;
-  margin-right: 10px;
+  border-radius: 3px;
 `;
 
-const AmountInput = styled.input`
-  padding: 10px;
-  font-size: 1em;
-  margin-bottom: 20px;
-  width: 200px;
-`;
-
-const ChartContainer = styled.div`
-  margin-top: 30px;
-  width: 80%;
-  max-width: 600px;
-`;
-
-const ExplanationContainer = styled.div`
+const Result = styled(motion.div)`
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.2rem;
   margin-top: 20px;
-  font-size: 1.2em;
-  color: #666;
-  padding: 10px;
-  background-color: #f7f7f7;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 600px;
 `;
 
-const App = () => {
-  const [fromCurrency, setFromCurrency] = useState('BRL');
-  const [toCurrency, setToCurrency] = useState('BOB');
-  const [exchangeRate, setExchangeRate] = useState(null);
-  const [currencies, setCurrencies] = useState([
-    { name: 'BRL', flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/2560px-Flag-of-Brazil.svg.png' },
-    { name: 'ARS', flag: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg' },
-    { name: 'PEN', flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_Peru.svg/2560px-Flag-of-Peru.svg.png' },
-    { name: 'BOB', flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Flag_of_Bolivia.svg/2560px-Flag-of-Bolivia.svg.png' },
-    { name: 'EUR', flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Europe.svg/2560px-Flag-of-Europe.svg.png' },
-    { name: 'USD', flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/2560px-Flag-of-the-United-States.svg.png' },
-  ]);
+const Calculation = styled.div`
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #ddd;
+`;
+
+// Animação com Framer Motion
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5 } },
+};
+
+const resultVariants = {
+  hidden: { scale: 0 },
+  visible: { scale: 1, transition: { type: "spring", stiffness: 100 } },
+};
+
+// Lista de moedas suportadas
+const currencies = [
+  { code: "BRL", name: "Real Brasileiro", flag: "https://flagcdn.com/br.svg" },
+  { code: "BOB", name: "Peso Boliviano", flag: "https://flagcdn.com/bo.svg" },
+  { code: "PEN", name: "Soles Peruanos", flag: "https://flagcdn.com/pe.svg" },
+  { code: "ARS", name: "Peso Argentino", flag: "https://flagcdn.com/ar.svg" },
+  { code: "EUR", name: "Euros", flag: "https://flagcdn.com/eu.svg" },
+  { code: "USD", name: "Dólares Americanos", flag: "https://flagcdn.com/us.svg" },
+];
+
+// Componente principal
+function App() {
+  const [fromCurrency, setFromCurrency] = useState("BRL");
+  const [toCurrency, setToCurrency] = useState("USD");
   const [amount, setAmount] = useState(1);
-  const [historicalData, setHistoricalData] = useState([]);
-  const [fromCurrencyRate, setFromCurrencyRate] = useState(null);
-  const [toCurrencyRate, setToCurrencyRate] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('6m'); // Novo estado para controlar o período de tempo
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  const [usdtToFrom, setUsdtToFrom] = useState(null);
+  const [usdtToTo, setUsdtToTo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mapeamento de moedas que não estão diretamente na Binance para moedas correlacionadas
-  const currencyMapping = {
-    'BOB': 'BRL', // Usando BRL como referência para BOB
-  };
-
-  // Iniciando o Chart.js
-  ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
-
-  // Função para buscar as taxas de câmbio
-  const fetchCurrencyRate = async (currency) => {
+  // Função para obter o valor de USDT em uma moeda específica
+  const getUSDTValue = async (currency) => {
     try {
-      const mappedCurrency = currencyMapping[currency] || currency;
-      const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=${mappedCurrency.toLowerCase()}`);
-      const rate = response.data.usd[mappedCurrency.toLowerCase()];
-
-      if (currency === fromCurrency) {
-        setFromCurrencyRate(rate);
-      } else {
-        setToCurrencyRate(rate);
-      }
+      const response = await axios.get(
+        `https://api.binance.com/api/v3/ticker/price?symbol=USDT${currency}`
+      );
+      return parseFloat(response.data.price);
     } catch (error) {
-      console.error('Erro ao obter taxas:', error);
+      console.error(`Erro ao buscar valor de USDT em ${currency}:`, error);
+      return null;
     }
   };
 
-  // Função para atualizar taxas em intervalos regulares
-  const updateCurrencyRates = () => {
-    fetchCurrencyRate(fromCurrency);
-    fetchCurrencyRate(toCurrency);
+  // Função para calcular a conversão
+  const convertCurrency = async () => {
+    setLoading(true);
+
+    const usdtFrom = await getUSDTValue(fromCurrency); // Valor de USDT na moeda de origem
+    const usdtTo = await getUSDTValue(toCurrency); // Valor de USDT na moeda de destino
+
+    if (usdtFrom && usdtTo) {
+      setUsdtToFrom(usdtFrom);
+      setUsdtToTo(usdtTo);
+
+      const conversionRate = usdtTo / usdtFrom; // Taxa de conversão
+      const result = amount * conversionRate; // Valor convertido
+      setConvertedAmount(result.toFixed(2)); // Arredonda para 2 casas decimais
+    } else {
+      setConvertedAmount(null);
+    }
+
+    setLoading(false);
   };
 
+  // Atualiza a conversão quando o valor ou as moedas mudam
   useEffect(() => {
-    updateCurrencyRates();
-    const intervalId = setInterval(updateCurrencyRates, 300000); // Atualiza a cada 5 minutos
-
-    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
-  }, [fromCurrency, toCurrency]);
-
-  useEffect(() => {
-    fetchHistoricalData(selectedPeriod);
-  }, [selectedPeriod]);
-
-  const fetchHistoricalData = async (period) => {
-    let data;
-    switch (period) {
-      case '6m':
-        data = [
-          { time: '2025-03-01', price: 1.00 },
-          { time: '2025-03-15', price: 1.02 },
-          { time: '2025-04-01', price: 1.05 },
-          { time: '2025-04-15', price: 1.08 },
-          { time: '2025-05-01', price: 1.10 },
-          { time: '2025-06-01', price: 1.12 },
-        ];
-        break;
-      case '1y':
-        data = [
-          { time: '2025-03-01', price: 1.00 },
-          { time: '2025-06-01', price: 1.05 },
-          { time: '2025-09-01', price: 1.10 },
-          { time: '2025-12-01', price: 1.15 },
-          { time: '2026-03-01', price: 1.20 },
-        ];
-        break;
-      case '5y':
-        data = [
-          { time: '2020-03-01', price: 1.00 },
-          { time: '2021-03-01', price: 1.10 },
-          { time: '2022-03-01', price: 1.20 },
-          { time: '2023-03-01', price: 1.30 },
-          { time: '2024-03-01', price: 1.40 },
-          { time: '2025-03-01', price: 1.50 },
-        ];
-        break;
-      default:
-        data = [];
-    }
-    setHistoricalData(data);
-  };
-
-  const handleAmountChange = (event) => {
-    setAmount(event.target.value);
-  };
-
-  const handlePeriodChange = (event) => {
-    setSelectedPeriod(event.target.value);
-  };
-
-  const convertCurrency = () => {
-    if (fromCurrencyRate && toCurrencyRate) {
-      const valueInUSDT = amount / fromCurrencyRate;
-      const convertedValue = valueInUSDT * toCurrencyRate;
-      return convertedValue.toFixed(2);
-    }
-    return 'Carregando taxas...';
-  };
-
-  const explanationText = () => {
-    if (fromCurrencyRate && toCurrencyRate) {
-      const valueInUSDT = amount / fromCurrencyRate;
-      const convertedValue = valueInUSDT * toCurrencyRate;
-      return `Primeiro, convertemos ${amount} ${fromCurrency} para USDT, usando a taxa de ${fromCurrency} para USDT: ${fromCurrencyRate}. O valor resultante é ${valueInUSDT.toFixed(2)} USDT. 
-      Depois, convertemos esse valor para ${toCurrency}, usando a taxa de USDT para ${toCurrency}: ${toCurrencyRate}. O valor final convertido é ${convertedValue.toFixed(2)} ${toCurrency}.`;
-    }
-    return 'Carregando taxas...';
-  };
+    convertCurrency();
+  }, [fromCurrency, toCurrency, amount]);
 
   return (
-    <Container>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-      >
-        <TitleText>Conversor de Moedas via USDT</TitleText>
+    <Container variants={containerVariants} initial="hidden" animate="visible">
+      <Title>CryptoSwap</Title>
 
-        {/* Seleção de Moeda */}
-        <div>
-          <SelectBox value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
-            {currencies.map((currency) => (
-              <OptionContainer key={currency.name} value={currency.name}>
-                <Flag src={currency.flag} alt={currency.name} />
-                {currency.name}
-              </OptionContainer>
-            ))}
-          </SelectBox>
+      {/* Seleção de moeda de origem */}
+      <SelectContainer>
+        <Select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+          {currencies.map((curr) => (
+            <option key={curr.code} value={curr.code}>
+              {curr.name} ({curr.code})
+            </option>
+          ))}
+        </Select>
+        <Flag src={currencies.find((curr) => curr.code === fromCurrency)?.flag} alt={`${fromCurrency} flag`} />
+      </SelectContainer>
 
-          <SelectBox value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
-            {currencies.map((currency) => (
-              <OptionContainer key={currency.name} value={currency.name}>
-                <Flag src={currency.flag} alt={currency.name} />
-                {currency.name}
-              </OptionContainer>
-            ))}
-          </SelectBox>
+      {/* Entrada de valor */}
+      <Input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(parseFloat(e.target.value))}
+        min="1"
+        placeholder="Quantidade"
+      />
 
-          <AmountInput
-            type="number"
-            value={amount}
-            onChange={handleAmountChange}
-            placeholder="Quantidade"
-          />
+      {/* Seleção de moeda de destino */}
+      <SelectContainer>
+        <Select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+          {currencies.map((curr) => (
+            <option key={curr.code} value={curr.code}>
+              {curr.name} ({curr.code})
+            </option>
+          ))}
+        </Select>
+        <Flag src={currencies.find((curr) => curr.code === toCurrency)?.flag} alt={`${toCurrency} flag`} />
+      </SelectContainer>
 
-          {/* Exibição do valor convertido */}
-          <ExchangeRate>
-            {convertCurrency()} {toCurrency}
-          </ExchangeRate>
+      {/* Exibição do resultado */}
+      {loading ? (
+        <p>Carregando...</p>
+      ) : (
+        <>
+          <Result variants={resultVariants} initial="hidden" animate="visible">
+            <p>
+              {amount} {fromCurrency} = {convertedAmount} {toCurrency}
+            </p>
+          </Result>
 
-          {/* Gráfico */}
-          <ChartContainer>
-            <Line
-              data={{
-                labels: historicalData.map(data => data.time),
-                datasets: [
-                  {
-                    label: `Taxa de ${fromCurrency} para ${toCurrency}`,
-                    data: historicalData.map(data => data.price),
-                    fill: false,
-                    borderColor: '#4CAF50',
-                    tension: 0.1,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                plugins: {
-                  title: {
-                    display: true,
-                    text: 'Histórico de Taxa de Câmbio',
-                  },
-                },
-              }}
-            />
-          </ChartContainer>
-
-          <Button onClick={() => alert('Conversão realizada!')}>Converter</Button>
-
-          <ExplanationContainer>
-            {explanationText()}
-          </ExplanationContainer>
-        </motion.div>
-      </motion.div>
+          {/* Detalhes do cálculo */}
+          <Calculation>
+            <p>
+              <strong>Cálculo:</strong>
+            </p>
+            <p>
+              1 USDT = {usdtToFrom} {fromCurrency}
+            </p>
+            <p>
+              1 USDT = {usdtToTo} {toCurrency}
+            </p>
+            <p>
+              Taxa de conversão: ({usdtToTo} / {usdtToFrom}) = {(usdtToTo / usdtToFrom).toFixed(2)}
+            </p>
+            <p>
+              Valor convertido: {amount} × {(usdtToTo / usdtToFrom).toFixed(2)} = {convertedAmount} {toCurrency}
+            </p>
+          </Calculation>
+        </>
+      )}
     </Container>
   );
-};
+}
 
 export default App;
