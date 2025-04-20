@@ -1,246 +1,397 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { motion } from "framer-motion";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import styled, { keyframes, createGlobalStyle } from 'styled-components';
+import axios from 'axios';
 
-// Estilos com Styled Components
-const Container = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-  padding: 20px;
-  font-family: "Arial", sans-serif;
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-`;
-
-const SelectContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-`;
-
-const Select = styled.select`
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: none;
-  background-color: #fff;
-  color: #333;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: none;
-  background-color: #fff;
-  color: #333;
-  width: 150px;
-`;
-
-const Flag = styled.img`
-  width: 30px;
-  height: 20px;
-  border-radius: 3px;
-`;
-
-const Result = styled(motion.div)`
-  background: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 20px;
-`;
-
-const Calculation = styled.div`
-  margin-top: 20px;
-  font-size: 1rem;
-  color: #ddd;
-`;
-
-const ErrorMessage = styled.div`
-  color: #ff6b6b;
-  margin-top: 10px;
-`;
-
-const LoadingSpinner = styled.div`
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #fff;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+// Estilos globais para garantir renderização de emojis
+const GlobalStyle = createGlobalStyle`
+  @font-face {
+    font-family: "EmojiFont";
+    src: local("Apple Color Emoji"), 
+         local("Segoe UI Emoji"), 
+         local("Segoe UI Symbol"),
+         local("Noto Color Emoji");
+    unicode-range: U+1F000-1F644, U+203C-3299;
+  }
+  
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif, "EmojiFont";
   }
 `;
 
-// Animação com Framer Motion
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5 } },
+// Cores e tema
+const colors = {
+  primary: '#6C5CE7',
+  secondary: '#00CEFF',
+  accent: '#FD79A8',
+  background: '#F9F9FF',
+  text: '#2D3436',
+  lightText: '#636E72',
+  card: '#FFFFFF',
+  border: '#DFE6E9'
 };
 
-const resultVariants = {
-  hidden: { scale: 0 },
-  visible: { scale: 1, transition: { type: "spring", stiffness: 100 } },
+// Animação de pulso
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+// Estilizações com Styled Components
+const Container = styled.div`
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: ${colors.background};
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(108, 92, 231, 0.15);
+  font-family: 'Segoe UI', system-ui, sans-serif, "EmojiFont";
+`;
+
+const Header = styled(motion.div)`
+  text-align: center;
+  margin-bottom: 2rem;
+  h1 {
+    color: ${colors.primary};
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+  p {
+    color: ${colors.lightText};
+    font-size: 1rem;
+  }
+`;
+
+const CurrencyCard = styled(motion.div)`
+  padding: 1.5rem;
+  background: ${colors.card};
+  border-radius: 16px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid ${colors.border};
+  transition: all 0.3s ease;
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const CurrencySelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 140px;
+`;
+
+const FlagContainer = styled.span`
+  font-size: 2rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(108, 92, 231, 0.1);
+  border-radius: 50%;
+  padding: 5px;
+  position: relative;
+  
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+`;
+
+const Input = styled.input`
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid ${colors.border};
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: ${colors.text};
+  text-align: right;
+  transition: all 0.3s ease;
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  }
+  &[readonly] {
+    background: ${colors.background};
+    color: ${colors.primary};
+    font-weight: 700;
+  }
+`;
+
+const Select = styled.select`
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid ${colors.border};
+  color: ${colors.text};
+  background: ${colors.card};
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:focus {
+    outline: none;
+    border-color: ${colors.primary};
+  }
+`;
+
+const SwapButton = styled(motion.button)`
+  background: linear-gradient(135deg, ${colors.primary}, ${colors.secondary});
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 1rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+  &:hover {
+    animation: ${pulse} 1.5s infinite;
+  }
+`;
+
+const RateInfo = styled(motion.div)`
+  text-align: center;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(108, 92, 231, 0.05);
+  border-radius: 12px;
+  p {
+    color: ${colors.lightText};
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+  }
+  .rate {
+    color: ${colors.primary};
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+`;
+
+const Loading = styled(motion.div)`
+  text-align: center;
+  padding: 1rem;
+  color: ${colors.lightText};
+`;
+
+// Sistema de emojis mais robusto com fallback
+const getCurrencyEmoji = (currencyCode) => {
+  const emojiMap = {
+    BOB: { emoji: '🇧🇴', fallback: 'BO', color: '#047857' },
+    BRL: { emoji: '🇧🇷', fallback: 'BR', color: '#1E40AF' },
+    USD: { emoji: '🇺🇸', fallback: 'US', color: '#1E40AF' },
+    EUR: { emoji: '🇪🇺', fallback: 'EU', color: '#0033AA' },
+    default: { emoji: '💱', fallback: '$', color: '#6C5CE7' }
+  };
+  
+  return emojiMap[currencyCode] || emojiMap.default;
 };
 
-// Lista de moedas suportadas
-const currencies = [
-  { code: "BRL", name: "Real Brasileiro", flag: "https://flagcdn.com/br.svg" },
-  { code: "BOB", name: "Peso Boliviano", flag: "https://flagcdn.com/bo.svg" },
-  { code: "PEN", name: "Soles Peruanos", flag: "https://flagcdn.com/pe.svg" },
-  { code: "ARS", name: "Peso Argentino", flag: "https://flagcdn.com/ar.svg" },
-  { code: "EUR", name: "Euros", flag: "https://flagcdn.com/eu.svg" },
-  { code: "USD", name: "Dólares Americanos", flag: "https://flagcdn.com/us.svg" },
-];
+// Componente Flag melhorado
+const Flag = ({ currencyCode }) => {
+  const { emoji, fallback, color } = getCurrencyEmoji(currencyCode);
+  
+  return (
+    <FlagContainer style={{ backgroundColor: `${color}20` }}>
+      <span aria-hidden="true" style={{ fontFamily: '"EmojiFont", sans-serif' }}>{emoji}</span>
+      <span className="sr-only">{fallback}</span>
+    </FlagContainer>
+  );
+};
 
-// Componente principal
-function App() {
-  const [fromCurrency, setFromCurrency] = useState("BRL");
-  const [toCurrency, setToCurrency] = useState("USD");
-  const [amount, setAmount] = useState(1);
-  const [convertedAmount, setConvertedAmount] = useState(null);
-  const [usdtToFrom, setUsdtToFrom] = useState(null);
-  const [usdtToTo, setUsdtToTo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+const Main = () => {
+  const [currencies, setCurrencies] = useState([]);
+  const [fromCurrency, setFromCurrency] = useState('BOB');
+  const [toCurrency, setToCurrency] = useState('BRL');
+  const [amount, setAmount] = useState(100);
+  const [convertedAmount, setConvertedAmount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [rateInfo, setRateInfo] = useState(null);
 
-  // Função para obter o valor de USDT em uma moeda específica
-  const getUSDTValue = async (currency) => {
-    try {
-      const response = await axios.get(
-        `https://api.binance.com/api/v3/ticker/price?symbol=USDT${currency}`
-      );
-      return parseFloat(response.data.price);
-    } catch (error) {
-      console.error(`Erro ao buscar valor de USDT em ${currency}:`, error);
-      setError(`Erro ao buscar valor de USDT em ${currency}. Tente novamente.`);
-      return null;
-    }
-  };
-
-  // Função para calcular a conversão
-  const convertCurrency = async () => {
-    if (amount <= 0) {
-      setError("O valor deve ser maior que zero.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const usdtFrom = await getUSDTValue(fromCurrency); // Valor de USDT na moeda de origem
-    const usdtTo = await getUSDTValue(toCurrency); // Valor de USDT na moeda de destino
-
-    if (usdtFrom && usdtTo) {
-      setUsdtToFrom(usdtFrom);
-      setUsdtToTo(usdtTo);
-
-      const conversionRate = usdtTo / usdtFrom; // Taxa de conversão
-      const result = amount * conversionRate; // Valor convertido
-      setConvertedAmount(result.toFixed(2)); // Arredonda para 2 casas decimais
-    } else {
-      setConvertedAmount(null);
-    }
-
-    setLoading(false);
-  };
-
-  // Atualiza a conversão quando o valor ou as moedas mudam
   useEffect(() => {
-    convertCurrency();
-  }, [fromCurrency, toCurrency, amount]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('https://backend-crypto-swap.onrender.com/api/exchange/');
+        const filtered = response.data.filter(currency => currency.currency_code !== 'USDT');
+        setCurrencies(filtered);
+        
+        // Prepara informações da taxa
+        if (filtered.length >= 2) {
+          const from = filtered.find(c => c.currency_code === 'BOB');
+          const to = filtered.find(c => c.currency_code === 'BRL');
+          if (from && to) {
+            setRateInfo({
+              buyRate: parseFloat(to.buy_rate).toFixed(4),
+              sellRate: parseFloat(from.sell_rate).toFixed(4),
+              spread: parseFloat(from.spread).toFixed(2),
+              lastUpdated: new Date(from.last_updated).toLocaleString()
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const calculateConversion = () => {
+      if (!currencies.length) return;
+
+      const from = currencies.find(c => c.currency_code === fromCurrency);
+      const to = currencies.find(c => c.currency_code === toCurrency);
+
+      if (from && to) {
+        let result;
+        // Calcula seguindo a lógica do Excel
+        if (fromCurrency === 'BOB' && toCurrency === 'BRL') {
+          result = (amount / parseFloat(from.sell_rate)) * 0.975 * parseFloat(to.buy_rate);
+        } else if (fromCurrency === 'BRL' && toCurrency === 'BOB') {
+          result = (amount / parseFloat(from.sell_rate)) * 0.975 * parseFloat(to.buy_rate);
+        } else {
+          result = amount; // Mesma moeda
+        }
+        
+        setConvertedAmount(result.toFixed(2));
+      }
+    };
+
+    calculateConversion();
+  }, [amount, fromCurrency, toCurrency, currencies]);
+
+  const handleSwap = () => {
+    setFromCurrency(toCurrency);
+    setToCurrency(fromCurrency);
+  };
+
+  const formatCurrency = (value, currencyCode) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: currencyCode
+    }).format(value).replace(/\D00(?=\D*$)/, '');
+  };
 
   return (
-    <Container variants={containerVariants} initial="hidden" animate="visible">
-      <Title>CryptoSwap</Title>
+    <>
+      <GlobalStyle />
+      <Container>
+        <Header
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h1>Conversor Global <span style={{ fontFamily: '"EmojiFont", sans-serif' }}>🌎</span></h1>
+          <p>Taxas competitivas em tempo real</p>
+        </Header>
 
-      {/* Seleção de moeda de origem */}
-      <SelectContainer>
-        <Select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
-          {currencies.map((curr) => (
-            <option key={curr.code} value={curr.code}>
-              {curr.name} ({curr.code})
-            </option>
-          ))}
-        </Select>
-        <Flag src={currencies.find((curr) => curr.code === fromCurrency)?.flag} alt={`${fromCurrency} flag`} />
-      </SelectContainer>
+        {loading ? (
+          <Loading
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            Carregando cotações...
+          </Loading>
+        ) : (
+          <>
+            <CurrencyCard 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <CurrencySelector>
+                <Flag currencyCode={fromCurrency} />
+                <Select 
+                  value={fromCurrency}
+                  onChange={(e) => setFromCurrency(e.target.value)}
+                >
+                  {currencies.map(currency => (
+                    <option key={currency.id} value={currency.currency_code}>
+                      {currency.currency_code} - {currency.currency_name}
+                    </option>
+                  ))}
+                </Select>
+              </CurrencySelector>
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </CurrencyCard>
 
-      {/* Entrada de valor */}
-      <Input
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(parseFloat(e.target.value))}
-        min="1"
-        placeholder="Quantidade"
-      />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <SwapButton
+                onClick={handleSwap}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <span style={{ fontFamily: '"EmojiFont", sans-serif' }}>🔄</span>
+              </SwapButton>
+            </div>
 
-      {/* Seleção de moeda de destino */}
-      <SelectContainer>
-        <Select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
-          {currencies.map((curr) => (
-            <option key={curr.code} value={curr.code}>
-              {curr.name} ({curr.code})
-            </option>
-          ))}
-        </Select>
-        <Flag src={currencies.find((curr) => curr.code === toCurrency)?.flag} alt={`${toCurrency} flag`} />
-      </SelectContainer>
+            <CurrencyCard 
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <CurrencySelector>
+                <Flag currencyCode={toCurrency} />
+                <Select
+                  value={toCurrency}
+                  onChange={(e) => setToCurrency(e.target.value)}
+                >
+                  {currencies.map(currency => (
+                    <option key={currency.id} value={currency.currency_code}>
+                      {currency.currency_code} - {currency.currency_name}
+                    </option>
+                  ))}
+                </Select>
+              </CurrencySelector>
+              <Input
+                type="text"
+                value={formatCurrency(convertedAmount, toCurrency)}
+                readOnly
+              />
+            </CurrencyCard>
 
-      {/* Exibição do resultado */}
-      {loading ? (
-        <LoadingSpinner />
-      ) : error ? (
-        <ErrorMessage>{error}</ErrorMessage>
-      ) : (
-        <>
-          <Result variants={resultVariants} initial="hidden" animate="visible">
-            <p>
-              {amount} {fromCurrency} = {convertedAmount} {toCurrency}
-            </p>
-          </Result>
-
-          {/* Detalhes do cálculo */}
-          <Calculation>
-            <p>
-              <strong>Cálculo:</strong>
-            </p>
-            <p>
-              1 USDT = {usdtToFrom} {fromCurrency}
-            </p>
-            <p>
-              1 USDT = {usdtToTo} {toCurrency}
-            </p>
-            <p>
-              Taxa de conversão: ({usdtToTo} / {usdtToFrom}) = {(usdtToTo / usdtToFrom).toFixed(2)}
-            </p>
-            <p>
-              Valor convertido: {amount} × {(usdtToTo / usdtToFrom).toFixed(2)} = {convertedAmount} {toCurrency}
-            </p>
-          </Calculation>
-        </>
-      )}
-    </Container>
+            {rateInfo && (
+              <RateInfo
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+              </RateInfo>
+            )}
+          </>
+        )}
+      </Container>
+    </>
   );
-}
+};
 
-export default App;
+export default Main;
