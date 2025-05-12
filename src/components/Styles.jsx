@@ -2,21 +2,27 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 export const Container = styled.div`
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 `;
 
 export const Header = styled.header`
   text-align: center;
   margin-bottom: 2rem;
-  
+
+  img {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+  }
+
   h1 {
     color: #2c3e50;
     margin-bottom: 0.5rem;
   }
-  
+
   p {
     color: #7f8c8d;
   }
@@ -32,18 +38,41 @@ export const FormContainer = styled.div`
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "from"
+      "swap"
+      "to";
+  }
 `;
+
 
 export const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  
+
   label {
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: #2c3e50;
   }
+
+  &:first-child {
+    @media (max-width: 768px) {
+      grid-area: from;
+    }
+  }
+
+  &:last-child {
+    @media (max-width: 768px) {
+      grid-area: to;
+    }
+  }
 `;
+
 
 export const CurrencySelect = styled.select`
   padding: 0.75rem;
@@ -72,8 +101,13 @@ export const SwapButton = styled(motion.button)`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    grid-area: swap;
+    margin: 0 auto;
+  }
 `;
+
 
 export const ConvertButton = styled(motion.button)`
   grid-column: 1 / -1;
@@ -86,7 +120,7 @@ export const ConvertButton = styled(motion.button)`
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  
+
   &:disabled {
     background: #95a5a6;
     cursor: not-allowed;
@@ -123,5 +157,10 @@ export const Amount = styled.div`
   font-weight: 700;
   color: #27ae60;
   margin: 1rem 0;
-`;
 
+  img {
+    vertical-align: middle;
+    width: 24px;
+    height: auto;
+  }
+`;
