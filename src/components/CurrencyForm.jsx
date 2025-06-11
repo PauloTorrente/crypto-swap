@@ -48,7 +48,7 @@ const CurrencyForm = ({
           onChange={(e) => setAmount(e.target.value)}
           min="0.01"
           step="0.01"
-          placeholder="Digite o valor"
+          placeholder="Digita el valor"
         />
       </InputGroup>
 
