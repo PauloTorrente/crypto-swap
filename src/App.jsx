@@ -13,7 +13,7 @@ import {
 import Logo from './assets/Logo.png';
 import Brasil from './assets/Brasil.jpg';
 import Bolivia from './assets/Bolivia.png';
-
+import Whatsapp from './components/Whatsapp'; // Importação adicionada
 
 const App = () => {
   const [fromCurrency, setFromCurrency] = useState('BRL');
@@ -120,11 +120,13 @@ const App = () => {
                 />
                 {formatCurrency(result.finalAmount, result.toCurrency)}
               </Amount>
-
             </FinalResult>
           </ResultContainer>
         )}
       </AnimatePresence>
+
+      {/* Componente Whatsapp adicionado aqui */}
+      <Whatsapp />
     </Container>
   );
 };
