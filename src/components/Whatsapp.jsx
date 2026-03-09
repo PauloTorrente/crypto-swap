@@ -23,7 +23,7 @@ const Whatsapp = () => {
 const styles = {
   container: {
     position: 'fixed',
-    bottom: '20px',
+    bottom: '70px',
     right: '20px',
     zIndex: 1000,
   },
@@ -32,8 +32,8 @@ const styles = {
     transition: 'transform 0.3s ease',
   },
   logo: {
-    width: '160px',
-    height: '160px',
+    width: '60px',
+    height: '60px',
     borderRadius: '50%',
     boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   }
