@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Container,
   Shell,
@@ -115,10 +114,7 @@ const App = () => {
             <HeroName>Don Juan</HeroName>
             <HeroTitle>Tu Casa de Cambio de Confianza en Santa Cruz, Bolivia</HeroTitle>
             <HeroDescription>
-              Especialista en <strong>cambio de divisas BRL/BOB</strong> y <strong>remesas internacionales</strong> 
-              entre Brasil y Bolivia. También realizamos operaciones con Perú, Argentina, Chile, Colombia, 
-              Venezuela y Panamá. Atención personalizada, trato directo y las mejores tasas del mercado. 
-              Sin intermediarios, sin comisiones ocultas.
+              Especialista en <strong>cambio de divisas BRL/BOB</strong> y <strong>remesas internacionales</strong> entre Brasil y Bolivia. También realizamos operaciones con Perú, Argentina, Chile, Colombia, Venezuela y Panamá. Atención personalizada, trato directo y las mejores tasas del mercado. Sin intermediarios, sin comisiones ocultas.
             </HeroDescription>
             
             <BadgeContainer>
@@ -168,7 +164,7 @@ const App = () => {
                 <ServiceEmoji>💵</ServiceEmoji>
                 <ServiceText>
                   <ServiceTitle>Casa de Cambio Santa Cruz</ServiceTitle>
-                  <ServiceDesc>Cambio de Real Brasileño (BRL) a Boliviano (BOB) y viceversa. Atención presencial en el centro de Santa Cruz con la mejor cotización del mercado. Nuestro principal servicio es el corredor cambiario Brasil-Bolivia.</ServiceDesc>
+                  <ServiceDesc>Cambio de Real Brasileño (BRL) a Boliviano (BOB) y viceversa. Atención presencial en el centro de Santa Cruz con la mejor cotización del mercado. Nuestro principal servicio es el corredor cambiario Brasil - Bolivia.</ServiceDesc>
                 </ServiceText>
               </ServiceItem>
 
@@ -176,7 +172,7 @@ const App = () => {
                 <ServiceEmoji>🌎</ServiceEmoji>
                 <ServiceText>
                   <ServiceTitle>Remesas Internacionales</ServiceTitle>
-                  <ServiceDesc>Envío y recepción de dinero entre Bolivia y países como Brasil, Perú, Argentina, Chile, Colombia, Venezuela y Panamá. Transferencias rápidas, seguras y con las tasas más competitivas. Especialista en el corredor Brasil-Bolivia.</ServiceDesc>
+                  <ServiceDesc>Envío y recepción de dinero entre Bolivia y países como Brasil, Perú, Argentina, Chile, Colombia, Venezuela y Panamá. Transferencias rápidas, seguras y con las tasas más competitivas. Especialista en el corredor Brasil - Bolivia.</ServiceDesc>
                 </ServiceText>
               </ServiceItem>
 
@@ -325,7 +321,7 @@ const App = () => {
               <InfoIcon>⏰</InfoIcon>
               <InfoContent>
                 <InfoLabel>Horario de atención</InfoLabel>
-                <InfoValue>Lunes a Viernes 9:00–18:00 • Sábados 9:00–13:00</InfoValue>
+                <InfoValue>Lunes a Viernes 8:00–20:00 • Sábados 8:00–20:00</InfoValue>
               </InfoContent>
             </InfoItem>
 
@@ -380,7 +376,7 @@ const App = () => {
             desde Santa Cruz hacia Brasil (mi especialidad), así como también hacia Perú, Argentina, Chile, Colombia, 
             Venezuela y Panamá. También recibo remesas desde estos países hacia Bolivia. Proceso ágil, 
             tasas preferenciales y atención personalizada para cada cliente. Mi foco principal es el corredor 
-            Brasil-Bolivia, ofreciendo las mejores tasas del mercado para el cambio BRL/BOB.
+            Brasil - Bolivia, ofreciendo las mejores tasas del mercado para el cambio BRL/BOB.
           </SeoParagraph>
 
           <SeoHeading>¿Por qué elegir mi casa de cambio en Santa Cruz?</SeoHeading>
