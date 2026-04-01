@@ -11,33 +11,32 @@ export const Container = styled.div`
   --subtle: #8a93a3;
   --success: #0a7a4b;
   --danger: #c62828;
-  --shadow: 0 10px 30px rgba(11, 15, 25, 0.06);
-  --shadow-soft: 0 2px 10px rgba(11, 15, 25, 0.06);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --focus: 0 0 0 4px rgba(30, 110, 255, 0.12);
-  --cta: #0b0f19;
-  --cta-hover: #1f2937;
-  --cta-disabled: #c9cdd4;
 
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 `;
 
 export const Shell = styled.div`
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 16px 16px 140px;
+  padding: 16px 20px 120px;
+  box-sizing: border-box;
+  overflow-x: hidden;
   
   @media (min-width: 480px) {
     max-width: 480px;
-    padding: 20px 16px 140px;
+    padding: 20px 20px 120px;
+  }
+  
+  @media (min-width: 768px) {
+    max-width: 600px;
   }
 `;
 
@@ -47,22 +46,28 @@ export const Header = styled(motion.header)`
   z-index: 100;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(11, 15, 25, 0.04);
+  width: 100%;
+  overflow-x: hidden;
 `;
 
 export const HeaderInner = styled.div`
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 16px 16px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
   
   @media (min-width: 480px) {
     max-width: 480px;
-    padding: 16px 16px;
+    padding: 14px 20px;
+  }
+  
+  @media (min-width: 768px) {
+    max-width: 600px;
   }
 `;
 
@@ -76,205 +81,35 @@ export const BrandLogo = styled.img`
   height: 32px;
   width: auto;
   display: block;
-  object-fit: contain;
-  
-  @media (min-width: 480px) {
-    height: 34px;
-  }
 `;
 
 export const LocationPill = styled.div`
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
-  font-weight: 800;
-  padding: 8px 12px;
+  font-weight: 700;
+  padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  
-  @media (min-width: 480px) {
-    font-size: 12px;
-    padding: 8px 14px;
-  }
-`;
-
-export const TitleBlock = styled.div`
-  padding: 24px 0 20px;
-  text-align: center;
-  
-  @media (min-width: 480px) {
-    padding: 28px 0 24px;
-  }
-`;
-
-export const Title = styled.h1`
-  margin: 0;
-  font-size: 24px;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  font-weight: 950;
-  color: var(--text);
-  
-  @media (min-width: 480px) {
-    font-size: 28px;
-  }
-`;
-
-export const Subtitle = styled.p`
-  margin: 8px auto 0;
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.4;
-  font-weight: 500;
-  max-width: 280px;
-  
-  @media (min-width: 480px) {
-    font-size: 15px;
-    max-width: 320px;
-  }
+  background: white;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 `;
 
 export const Card = styled(motion.div)`
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(11, 15, 25, 0.05);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
-  &:active {
-    transform: scale(0.995);
-  }
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const CardBody = styled.div`
-  padding: 18px;
-  
-  @media (min-width: 480px) {
-    padding: 20px;
-  }
-`;
-
-export const Divider = styled.div`
-  height: 1px;
-  background: var(--border);
-  margin: 0;
-`;
-
-export const ErrorBox = styled(motion.div)`
-  margin-top: 16px;
-  border: 1px solid rgba(198, 40, 40, 0.25);
-  background: rgba(198, 40, 40, 0.06);
-  color: var(--danger);
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  font-size: 14px;
-  line-height: 1.4;
-  
-  @media (min-width: 480px) {
-    font-size: 14px;
-    padding: 16px;
-  }
-`;
-
-export const ResultContainer = styled(motion.div)`
-  margin-top: 20px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  padding: 18px;
-  box-shadow: 0 4px 20px rgba(11, 15, 25, 0.05);
-  
-  @media (min-width: 480px) {
-    padding: 20px;
-  }
-`;
-
-export const ResultTopRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 12px;
-`;
-
-export const ResultSide = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-`;
-
-export const ResultMeta = styled.div`
-  display: grid;
-  gap: 4px;
-
-  .label {
-    font-size: 13px;
-    color: var(--subtle);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-
-  .code {
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--text);
-  }
-`;
-
-export const Arrow = styled.div`
-  font-size: 14px;
-  color: var(--subtle);
-  font-weight: 900;
-  padding: 0 4px;
-`;
-
-export const FinalResult = styled.div`
-  text-align: center;
-  margin-top: 16px;
-`;
-
-export const Amount = styled.div`
-  margin-top: 12px;
-  display: grid;
-  gap: 8px;
-
-  .from {
-    font-size: 15px;
-    color: var(--muted);
-    font-weight: 700;
-    opacity: 0.9;
-  }
-
-  .to {
-    font-size: 32px;
-    font-weight: 950;
-    letter-spacing: -0.02em;
-    color: var(--success);
-    line-height: 1.1;
-    
-    @media (min-width: 480px) {
-      font-size: 36px;
-    }
-  }
-`;
-
-export const Note = styled.div`
-  margin-top: 16px;
-  font-size: 13px;
-  color: var(--muted);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
-  text-align: center;
-  font-weight: 500;
-  line-height: 1.4;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const Footer = styled.footer`
@@ -284,164 +119,366 @@ export const Footer = styled.footer`
   bottom: 0;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
   z-index: 90;
-  box-shadow: 0 -2px 10px rgba(11, 15, 25, 0.04);
+  width: 100%;
 `;
 
 export const FooterInner = styled.div`
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 14px 16px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--subtle);
-  font-size: 12px;
-  font-weight: 600;
+  box-sizing: border-box;
   
   @media (min-width: 480px) {
     max-width: 480px;
-    padding: 16px;
-  }
-`;
-
-/* FORM STYLES */
-export const FormContainer = styled.div`
-  display: grid;
-  gap: 16px;
-`;
-
-export const InputGroup = styled.div`
-  display: grid;
-  gap: 10px;
-
-  label {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-`;
-
-export const Field = styled.div`
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  display: grid;
-  gap: 12px;
-  transition: all 0.2s ease;
-
-  &:focus-within {
-    box-shadow: var(--focus);
-    border-color: rgba(30, 110, 255, 0.35);
   }
   
-  @media (min-width: 480px) {
-    padding: 18px;
+  @media (min-width: 768px) {
+    max-width: 600px;
   }
 `;
 
-export const Row = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+// Hero Section Components
+export const HeroSection = styled(motion.div)`
+  text-align: center;
+  margin-bottom: 24px;
+  width: 100%;
 `;
 
-export const Input = styled.input`
-  border: none;
-  outline: none;
+export const HeroImage = styled.img`
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+`;
+
+export const HeroContent = styled.div`
+  padding: 0;
   width: 100%;
-  background: transparent;
-  font-size: 30px;
+`;
+
+export const HeroName = styled.h1`
+  font-size: 28px;
   font-weight: 950;
   letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: #0b0f19;
+  word-break: keep-all;
+`;
+
+export const HeroTitle = styled.p`
+  font-size: 16px;
+  font-weight: 700;
+  color: #0a7a4b;
+  margin: 0 0 12px;
+`;
+
+export const HeroDescription = styled.p`
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5a6472;
+  margin: 0 0 16px;
   padding: 0;
-  color: var(--text);
-  caret-color: #1e6eff;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-
-  &::placeholder {
-    color: #c2c8d3;
-    font-weight: 900;
-    opacity: 0.7;
-  }
-  
-  &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  
-  @media (min-width: 480px) {
-    font-size: 32px;
-  }
 `;
 
-export const SwapButton = styled(motion.button)`
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--text);
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-weight: 950;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 16px;
-  min-height: 44px;
-  min-width: 44px;
+export const BadgeContainer = styled.div`
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
+  gap: 8px;
+`;
 
-  &:active {
-    background: var(--surface-2);
-    transform: scale(0.97);
-  }
+export const Badge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a7a4b;
+  gap: 4px;
+  white-space: nowrap;
   
-  @media (min-width: 480px) {
-    padding: 12px 16px;
-    font-size: 17px;
+  @media (max-width: 480px) {
+    white-space: normal;
+    font-size: 11px;
   }
 `;
 
-export const ConvertButton = styled(motion.button)`
+// Stats Components
+export const StatsRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 8px;
   width: 100%;
-  border: none;
-  border-radius: 14px;
-  padding: 18px 16px;
+`;
+
+export const StatBox = styled.div`
+  text-align: center;
+  padding: 14px 8px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e6e8eb;
+`;
+
+export const StatNumber = styled.div`
+  font-size: 22px;
   font-weight: 950;
-  font-size: 16px;
-  cursor: pointer;
-  background: var(--cta);
-  color: #fff;
-  transition: all 0.2s ease;
-  min-height: 56px;
+  color: #0a7a4b;
+`;
+
+export const StatLabel = styled.div`
+  font-size: 11px;
+  color: #5a6472;
+  font-weight: 600;
+  margin-top: 4px;
+`;
+
+// Services Components
+export const ServicesGrid = styled.div`
+  display: grid;
+  gap: 16px;
+  width: 100%;
+`;
+
+export const ServiceItem = styled.div`
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 4px 0;
+  width: 100%;
+`;
+
+export const ServiceEmoji = styled.div`
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
+  background: #f6f7f9;
+  border-radius: 14px;
+  flex-shrink: 0;
+`;
 
-  &:disabled {
-    cursor: not-allowed;
-    background: var(--cta-disabled);
-    color: #fff;
-    opacity: 0.7;
-  }
+export const ServiceText = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
 
-  &:not(:disabled):active {
-    transform: scale(0.98);
+export const ServiceTitle = styled.div`
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #0b0f19;
+`;
+
+export const ServiceDesc = styled.div`
+  font-size: 13px;
+  color: #5a6472;
+  line-height: 1.4;
+  word-wrap: break-word;
+`;
+
+// Contact Components
+export const ContactCard = styled.div`
+  border-radius: 24px;
+  background: #fef9e3;
+  padding: 20px;
+  border: 1px solid #e6e8eb;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+export const ContactInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+`;
+
+export const ContactButton = styled(motion.a)`
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #25D366;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 40px;
+  padding: 14px 20px;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+// SEO Components
+export const SeoContent = styled.div`
+  margin-top: 32px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  border: 1px solid #e6e8eb;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+export const SeoHeading = styled.h2`
+  font-size: 18px;
+  font-weight: 950;
+  margin: 0 0 12px;
+  color: #0b0f19;
+  word-wrap: break-word;
+`;
+
+export const SeoParagraph = styled.p`
+  font-size: 12px;
+  line-height: 1.5;
+  color: #5a6472;
+  margin-bottom: 12px;
+  word-wrap: break-word;
+  
+  strong {
+    color: #0b0f19;
   }
   
-  @media (min-width: 480px) {
-    font-size: 17px;
-    padding: 18px 20px;
-    border-radius: 16px;
+  &:last-child {
+    margin-bottom: 0;
   }
+`;
+
+// Countries Components
+export const CountriesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  width: 100%;
+  
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
+export const CountryItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  background: #fff;
+  border: 1px solid #e6e8eb;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(11,15,25,0.08);
+    border-color: #0a7a4b;
+  }
+`;
+
+export const CountryFlag = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 2px solid #e6e8eb;
+`;
+
+export const CountryName = styled.div`
+  font-size: 14px;
+  font-weight: 800;
+  color: #0b0f19;
+  margin-bottom: 4px;
+`;
+
+export const InfoCard = styled.div`
+  margin-top: 32px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid #e6e8eb;
+  box-shadow: 0 2px 12px rgba(11, 15, 25, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+export const InfoCardTitle = styled.h3`
+  font-size: 20px;
+  font-weight: 950;
+  margin: 0 0 20px 0;
+  color: #0b0f19;
+  text-align: center;
+`;
+
+export const InfoGrid = styled.div`
+  display: grid;
+  gap: 16px;
+  width: 100%;
+`;
+
+export const InfoItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #f0f1f3;
+    transform: translateX(4px);
+  }
+`;
+
+export const InfoIcon = styled.div`
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+`;
+
+export const InfoContent = styled.div`
+  flex: 1;
+`;
+
+export const InfoLabel = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  color: #5a6472;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+export const InfoValue = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b0f19;
+  line-height: 1.4;
 `;
