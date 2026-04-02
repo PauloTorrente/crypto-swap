@@ -134,11 +134,11 @@ const App = () => {
         {/* Stats de confianza */}
         <StatsRow>
           <StatBox>
-            <StatNumber>+500</StatNumber>
+            <StatNumber>105</StatNumber>
             <StatLabel>Clientes Satisfechos</StatLabel>
           </StatBox>
           <StatBox>
-            <StatNumber>15+</StatNumber>
+            <StatNumber>2+</StatNumber>
             <StatLabel>Años de Experiencia</StatLabel>
           </StatBox>
           <StatBox>
